@@ -3,7 +3,6 @@ import re
 from _iso import _iso_master
 from _iso import _name_to_iso_master
 
-
 class BaseUtility:
     def __init__(self, first_path: str , second_path: str, delimiter = None, decimal = None):
         if delimiter is None and decimal is None:
@@ -69,55 +68,57 @@ class BaseUtility:
         else:
             raise ValueError("The instances parameter of 'which' should either 'first' or 'second', that is not case sensitive.")
 
-    def orchestrate(self, special = None, which_special = None):
+    def orchestrate(self, commit = None, special = None, which_special = None):
         self.dict0 = dict()
         self.dict1 = dict()
         self.masterdict = dict()
         if special is None and which_special is None:
-            _data0 = self.data0.drop(columns = 'iso3')
-            _data1 = self.data1.drop(columns = 'iso3')
+            _data0 = self.data0.drop(columns = 'iso3').copy()
+            _data1 = self.data1.drop(columns = 'iso3').copy()
         else:
-            which_special = which_special.lower()
-            special = special.lower()
-            if special == 'imf' and which_special == 'first':
-                for i in range(len(self.data0.index)):
-                    _element = self.data0['iso3'][i]
-                    _temp_iso = re.search(r'([A-Z]{3})', _element)
-                    self.data0.at[i, 'iso3'] = _temp_iso.group(1)
-            elif special == 'imf' and which_special == 'second':
-                for i in range(len(self.data1.index)):
-                    _element = self.data0['iso3'][i]
-                    _temp_iso = re.search(r'([A-Z]{3})', _element)
-                    self.data1.at[i, 'iso3'] = _temp_iso.group(1)
-            elif special == 'oecd' and which_special == 'first':
-                for i in range(len(self.data0['iso3'].index)):
-                    if self.data0['iso3'][i] in list(_name_to_iso_master.keys()):
-                        self.data0.at[i, 'iso3'] = _name_to_iso_master[self.data0['iso3'][i]]
-                    else:
-                        continue
-            elif special == 'oecd' and which_special == 'second':
-                for i in range(len(self.data1.index)):
-                    if self.data1['iso3'][i] in list(_name_to_iso_master.keys()):
-                        self.data1.at[i, 'iso3'] = _name_to_iso_master[self.data1['iso3'][i]]
-                    else:
-                        continue
-            elif special == 'scimago' and which_special == 'first':
-                for i in range(len(self.data0.index)):
-                    if self.data0['iso3'][i] in list(_name_to_iso_master.keys()):
-                        self.data0.at[i, 'iso3'] = _name_to_iso_master[self.data0['iso3'][i]]
-                    else:
-                        continue
-            elif special == 'scimago' and which_special == 'second':
-                for i in range(len(self.data1.index)):
-                    if self.data1['iso3'][i] in list(_name_to_iso_master.keys()):
-                        self.data1.at[i, 'iso3'] = _name_to_iso_master[self.data1['iso3'][i]]
-                    else:
-                        continue
+            if isinstance(special, str) and isinstance(which_special, str):
+                which_special = which_special.lower()
+                special = special.lower()
+                if special == 'imf' and which_special == 'first':
+                    for i in range(len(self.data0.index)):
+                        _element = self.data0['iso3'][i]
+                        _temp_iso = re.search(r'([A-Z]{3})', _element)
+                        self.data0.at[i, 'iso3'] = _temp_iso.group(1)
+                elif special == 'imf' and which_special == 'second':
+                    for i in range(len(self.data1.index)):
+                        _element = self.data0['iso3'][i]
+                        _temp_iso = re.search(r'([A-Z]{3})', _element)
+                        self.data1.at[i, 'iso3'] = _temp_iso.group(1)
+                elif special == 'oecd' and which_special == 'first':
+                    for i in range(len(self.data0['iso3'].index)):
+                        if self.data0['iso3'][i] in list(_name_to_iso_master.keys()):
+                            self.data0.at[i, 'iso3'] = _name_to_iso_master[self.data0['iso3'][i]]
+                        else:
+                            continue
+                elif special == 'oecd' and which_special == 'second':
+                    for i in range(len(self.data1.index)):
+                        if self.data1['iso3'][i] in list(_name_to_iso_master.keys()):
+                            self.data1.at[i, 'iso3'] = _name_to_iso_master[self.data1['iso3'][i]]
+                        else:
+                            continue
+                elif special == 'scimago' and which_special == 'first':
+                    for i in range(len(self.data0.index)):
+                        if self.data0['iso3'][i] in list(_name_to_iso_master.keys()):
+                            self.data0.at[i, 'iso3'] = _name_to_iso_master[self.data0['iso3'][i]]
+                        else:
+                            continue
+                elif special == 'scimago' and which_special == 'second':
+                    for i in range(len(self.data1.index)):
+                        if self.data1['iso3'][i] in list(_name_to_iso_master.keys()):
+                            self.data1.at[i, 'iso3'] = _name_to_iso_master[self.data1['iso3'][i]]
+                        else:
+                            continue
             else:
                 pass
-            _data0 = self.data0.drop(columns = 'iso3')
-            _data1 = self.data1.drop(columns = 'iso3')
-    
+                
+            _data0 = self.data0.drop(columns = 'iso3').copy()
+            _data1 = self.data1.drop(columns = 'iso3').copy()
+        _nullable_list = [' ', '..', '...', 'NaN', 'NULL', 'Null', '_']
         for _feature_key in list(_data0.columns):
             _temp = dict()
             for i in range(len(self.data0.index)):
@@ -131,22 +132,21 @@ class BaseUtility:
         for _feature_key in list(self.dict0.keys()):
             _temp = dict()
             for __iso in _iso_master:
-                if __iso in self.dict0[_feature_key] and self.dict0[_feature_key][__iso] not in [' ', '..']:
+                if __iso in self.dict0[_feature_key] and self.dict0[_feature_key][__iso] not in _nullable_list:
                     _temp[__iso] = self.dict0[_feature_key][__iso]
-                elif __iso in self.dict0[_feature_key] and self.dict0[_feature_key][__iso] in [' ', '..']:
+                elif __iso in self.dict0[_feature_key] and self.dict0[_feature_key][__iso] in _nullable_list:
                     _temp[__iso] = 'NaN'
                 elif __iso not in self.dict0[_feature_key]:
                     _temp[__iso] = 'NaN'
                 else:
                     continue
-
             self.masterdict[_feature_key] = _temp
         for _feature_key in list(self.dict1.keys()):
             _temp = dict()
             for __iso in _iso_master:
-                if __iso in self.dict1[_feature_key] and self.dict1[_feature_key][__iso] not in [' ', '..']:
+                if __iso in self.dict1[_feature_key] and self.dict1[_feature_key][__iso] not in _nullable_list:
                     _temp[__iso] = self.dict1[_feature_key][__iso]
-                elif __iso in self.dict1[_feature_key] and self.dict1[_feature_key][__iso] in [' ', '..']:
+                elif __iso in self.dict1[_feature_key] and self.dict1[_feature_key][__iso] in _nullable_list:
                     _temp[__iso] = 'NaN'
                 elif __iso not in self.dict1[_feature_key]:
                     _temp[__iso] = 'NaN'
@@ -154,7 +154,15 @@ class BaseUtility:
                     continue
             self.masterdict[_feature_key] = _temp
         self.masterdata = pd.DataFrame(self.masterdict)
-    
+        if commit is not None:
+            commit = commit.lower()
+            self.masterdata = self.masterdata.reindex()
+            self.masterdata = self.masterdata.rename(
+                columns = {
+                    'index': 'iso3'
+                }
+            )
+        else: pass
 
 
 
