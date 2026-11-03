@@ -113,12 +113,60 @@ class BaseUtility:
                             self.data1.at[i, 'iso3'] = _name_to_iso_master[self.data1['iso3'][i]]
                         else:
                             continue
+                else:
+                    pass
+            elif isinstance(special, tuple) and isinstance(which_special, tuple):
+                _options = {
+                    'first': (special[0), which_special[0]), 
+                    'second': (special[1], which_special[1])
+                }
+                for k in list(_options.keys()):
+                    special = _options[k][0].lower()
+                    which_special = _options[k][1].lower()
+                    if special == 'imf' and which_special == 'first':
+                        for i in range(len(self.data0.index)):
+                            _element = self.data0['iso3'][i]
+                            _temp_iso = re.search(r'([A-Z]{3})', _element)
+                            self.data0.at[i, 'iso3'] = _temp_iso.group(1)
+                    elif special == 'imf' and which_special == 'second':
+                        for i in range(len(self.data1.index)):
+                            _element = self.data0['iso3'][i]
+                            _temp_iso = re.search(r'([A-Z]{3})', _element)
+                            self.data1.at[i, 'iso3'] = _temp_iso.group(1)
+                    elif special == 'oecd' and which_special == 'first':
+                        for i in range(len(self.data0['iso3'].index)):
+                            if self.data0['iso3'][i] in list(_name_to_iso_master.keys()):
+                                self.data0.at[i, 'iso3'] = _name_to_iso_master[self.data0['iso3'][i]]
+                            else:
+                                continue
+                    elif special == 'oecd' and which_special == 'second':
+                        for i in range(len(self.data1.index)):
+                            if self.data1['iso3'][i] in list(_name_to_iso_master.keys()):
+                                self.data1.at[i, 'iso3'] = _name_to_iso_master[self.data1['iso3'][i]]
+                            else:
+                                continue
+                    elif special == 'scimago' and which_special == 'first':
+                        for i in range(len(self.data0.index)):
+                            if self.data0['iso3'][i] in list(_name_to_iso_master.keys()):
+                                self.data0.at[i, 'iso3'] = _name_to_iso_master[self.data0['iso3'][i]]
+                            else:
+                                continue
+                    elif special == 'scimago' and which_special == 'second':
+                        for i in range(len(self.data1.index)):
+                            if self.data1['iso3'][i] in list(_name_to_iso_master.keys()):
+                                self.data1.at[i, 'iso3'] = _name_to_iso_master[self.data1['iso3'][i]]
+                            else:
+                                continue
+                    else:
+                        pass
             else:
                 pass
                 
             _data0 = self.data0.drop(columns = 'iso3').copy()
             _data1 = self.data1.drop(columns = 'iso3').copy()
+        
         _nullable_list = [' ', '..', '...', 'NaN', 'NULL', 'Null', '_']
+        
         for _feature_key in list(_data0.columns):
             _temp = dict()
             for i in range(len(self.data0.index)):
