@@ -68,7 +68,7 @@ class BaseUtility:
         else:
             raise ValueError("The instances parameter of 'which' should either 'first' or 'second', that is not case sensitive.")
 
-    def orchestrate(self, commit = None, special = None, which_special = None):
+    def orchestrate(self, special = None, which_special = None):
         self.dict0 = dict()
         self.dict1 = dict()
         self.masterdict = dict()
@@ -202,15 +202,36 @@ class BaseUtility:
                     continue
             self.masterdict[_feature_key] = _temp
         self.masterdata = pd.DataFrame(self.masterdict)
-        if commit is not None:
-            commit = commit.lower()
-            self.masterdata = self.masterdata.reindex()
-            self.masterdata = self.masterdata.rename(
-                columns = {
-                    'index': 'iso3'
-                }
-            )
-        else: pass
+    
+    @staticmethod
+    def glue(*data):
+        mastercopy = pd.concat([f for f in data], axis = 1)
+        return mastercopy
+        
+    @staticmethod
+    def prune(data):
+        data = data.reset_index()
+        data = data.rename(
+            columns = {
+                'index': 'iso3'
+            }
+        )
+        _temp = list()
+        for i in range(len(data.index)):
+            for feature in list(data.columns):
+                if data.loc[i, feature] == 'NaN':
+                    _temp.append(i)
+                else:
+                    continue
+        _temp = list(set(_temp))
+        data = data.drop(
+            index = _temp
+        )
+        data = data.reset_index()
+        data = data.drop(
+            columns = 'index'
+        )
+        return data
 
 
 
