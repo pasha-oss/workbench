@@ -204,12 +204,12 @@ class BaseUtility:
         self.masterdata = pd.DataFrame(self.masterdict)
     
     @staticmethod
-    def glue(*data):
+    def Glue(*data):
         mastercopy = pd.concat([f for f in data], axis = 1)
         return mastercopy
         
     @staticmethod
-    def prune(data):
+    def Prune(data):
         data = data.reset_index()
         data = data.rename(
             columns = {
