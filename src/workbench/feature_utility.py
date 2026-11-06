@@ -34,7 +34,7 @@ class FeatureUtility:
                 self.data[i] = self.data[i].astype('str')
             else:
                 pass
-        def rationing(self, name: str,  numerator: str, denumerator: str):
+    def rationing(self, name: str,  numerator: str, denumerator: str):
         self.data[name] = self.data[numerator]*((self.data[denumerator])**-1)
 
     def transform(self, which: str|list[str], transform: str):
