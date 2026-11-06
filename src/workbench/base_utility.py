@@ -166,7 +166,7 @@ class BaseUtility:
             _data0 = self.data0.drop(columns = 'iso3').copy()
             _data1 = self.data1.drop(columns = 'iso3').copy()
 
-        _nullable = ['..', ' ', '.', '...', 'NULL', 'null', 'NAN', 'NaN', 'Null']
+        _nullable = ['..', ' ', '.', '...', 'NULL', 'null', 'NAN', 'NaN', 'Null', 'none', 'nan', 'None', 'NONE']
     
         for _feature_key in list(_data0.columns):
             _temp = dict()
@@ -211,6 +211,7 @@ class BaseUtility:
         
     @staticmethod
     def Prune(data):
+        _nullable = ['..', ' ', '.', '...', 'NULL', 'null', 'NAN', 'NaN', 'Null', 'none', 'nan', 'None', 'NONE']
         data = data.reset_index()
         data = data.rename(
             columns = {
@@ -220,7 +221,7 @@ class BaseUtility:
         _temp = list()
         for i in range(len(data.index)):
             for feature in list(data.columns):
-                if data.loc[i, feature] == 'NaN':
+                if data.loc[i, feature] in _nullable:
                     _temp.append(i)
                 else:
                     continue
