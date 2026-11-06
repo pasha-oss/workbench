@@ -2,6 +2,7 @@ import re
 import pandas as pd
 import numpy as np
 from . import key
+from scipy import stats
 
 class FeatureUtility:
     def __init__(self, data: pd.DataFrame):
@@ -33,6 +34,59 @@ class FeatureUtility:
                 self.data[i] = self.data[i].astype('str')
             else:
                 pass
+        def rationing(self, name: str,  numerator: str, denumerator: str):
+        self.data[name] = self.data[numerator]*((self.data[denumerator])**-1)
+
+    def transform(self, which: str|list[str], transform: str):
+        if isinstance(which, str):
+            if transform == 'Log Natural':
+                self.data['ln_' + f'{which}'] = np.log1p(self.data[which])
+            elif transform == 'Box-Cox':
+                _min = 0
+                for i in range(len(self.data.index)):
+                    if self.data[which][i] < 0:
+                        _min += 1
+                    else:
+                        continue
+                if _min > 0:
+                    raise ValueError("Box-Cox assumes all instances has positive values, instead use 'Yeo-Johnson'")
+                else:
+                    _transformed = stats.boxcox(self.data[which])
+                    _temp = self.data[[f for f in list(self.data.columns)]]
+                    _bc = pd.DataFrame(_transformed[0].reshape(-1, 1), columns = ['bc_'+f'{which}'])
+                    self.data = pd.concat([_temp, _bc], axis = 1)
+            elif transform == 'Yeo-Johnson':
+                _transformed = stats.yeojohnson(self.data[which])
+                _temp = self.data[[f for f in list(self.data.columns)]]
+                _bc = pd.DataFrame(_transformed[0].reshape(-1, 1), columns = ['yj_'+ f'{which}'])
+                self.data = pd.concat([_temp, _bc], axis = 1)
+            else:
+                pass
+        if isinstance(which, list):
+            for feature in which:
+                if transform == 'Log Natural':
+                    self.data['ln_' + f'{feature}'] = np.log1p(self.data[feature])
+                elif transform == 'Box-Cox':
+                    _min = 0
+                    for i in range(len(self.data[feature].index)):
+                        if self.data[feature][i] < 0:
+                            _min += 1
+                        else:
+                            continue
+                    if _min > 0:
+                        raise ValueError("Box-Cox assumes all instances has positive values, instead use 'Yeo-Johnson'")
+                    else:
+                        _transformed = stats.boxcox(self.data[feature])
+                        _bc = pd.DataFrame(_transformed[0].reshape(-1, 1), columns = ['bc_' + f'{feature}'])
+                        _temp = self.data[[f for f in list(self.data.columns)]]
+                        self.data = pd.concat([_temp, _bc], axis = 1)
+                elif transform == 'Yeo-Johnson':
+                    _transformed = stats.yeojohnson(self.data[feature])
+                    _bc = pd.DataFrame(_transformed[0].reshape(-1, 1), columns = ['yj_' + f'{feature}'])
+                    _temp = self.data[[f for f in list(self.data.columns)]]
+                    self.data = pd.concat([_temp, _bc], axis = 1)
+                else:
+                    pass
     
     @staticmethod
     def MakeIdentity():
