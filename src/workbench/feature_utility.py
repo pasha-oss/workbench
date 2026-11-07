@@ -87,7 +87,23 @@ class FeatureUtility:
                     self.data = pd.concat([_temp, _bc], axis = 1)
                 else:
                     pass
-    
+                    
+    def encode(self, which: str | list[str], order: bool , rank: list[str] | None = None, ranks: list[list[str]] | None = None):
+        if isinstance(which, str):
+            if order is False and rank is None and ranks is None:
+                _unique = self.data[which].unique()
+                _encoder = pd.CategoricalDtype(categories = _unique, ordered = False)
+                self.data[which] = self.data[which].astype(_encoder)
+            elif order is True and rank is not None and ranks is None:
+                if isinstance(rank, list):
+                    _unique = rank
+                    _encoder = pd.CategoricalDtype(categories = _unique, ordered = True)
+                    self.data[which] = self.data[which].astype(_encoder)
+                else:
+                    raise TypeError('Must a single list!')
+            else:
+                pass
+        
     @staticmethod
     def MakeIdentity():
         ref = key._feature_char_2015
