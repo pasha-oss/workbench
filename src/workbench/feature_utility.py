@@ -103,6 +103,21 @@ class FeatureUtility:
                     raise TypeError('Must a single list!')
             else:
                 pass
+        elif isinstance(which, list):
+            if order is False and ranks is None and rank is None:
+                for feature in which:
+                    _unique = self.data[feature].unique()
+                    _encoder = pd.CategoricalDtype(categories = _unique, ordered = False)
+                    self.data[feature] = self.data[feature].astype(_encoder)
+            elif order is True and ranks is not None and rank is None:
+                for i in range(len(which)):
+                    _unique = ranks[i]
+                    _encoder = pd.CategoricalDtype(categories = _unique, ordered = True)
+                    self.data[which[i]] = self.data[which[i]].astype(_encoder)
+                else:
+                    pass
+        else:
+            pass
         
     @staticmethod
     def MakeIdentity():
